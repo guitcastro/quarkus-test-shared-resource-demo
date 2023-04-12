@@ -10,7 +10,7 @@ import static org.hamcrest.CoreMatchers.is;
 @QuarkusTest
 @QuarkusTestResource(SharedResource.class)
 @QuarkusTestResource(value = UniqueResource.class, restrictToAnnotatedClass = true)
-public class ExampleResourceB {
+public class ExampleResourceTestA {
 
     @Test
     public void testHelloEndpoint() {

@@ -1,62 +1,33 @@
 # demo
 
-This project uses Quarkus, the Supersonic Subatomic Java Framework.
+This repository reproduces [ Mix shared QuarkusTestResource with restrictToAnnotatedClass restart all others QuarkusTestResource #32551 ](https://github.com/quarkusio/quarkus/issues/32551#issuecomment-1504676047)
 
-If you want to learn more about Quarkus, please visit its website: https://quarkus.io/ .
 
-## Running the application in dev mode
+We have a shared resource `SharedResource` which is used by `ExampleResourceTestA` and `ExampleResourceTestB`. 
+We also have an unique resource `UniqueResource` which is also used in the tests `ExampleResourceTestA` and
+`ExampleResourceTestB` but using `restrictToAnnotatedClass = true`
 
-You can run your application in dev mode that enables live coding using:
+`SharedResource` should started only once, but is being stopped and restart between tests executions.
 
-```shell script
-./gradlew quarkusDev
-```
+To reproduce simple run:
 
-> **_NOTE:_**  Quarkus now ships with a Dev UI, which is available in dev mode only at http://localhost:8080/q/dev/.
+`./gradlew test`
 
-## Packaging and running the application
+You can check the output for the logs:
 
-The application can be packaged using:
+ExampleResourceTestA STANDARD_ERROR  
+> 
+>    INFO: SharedResource started    
+>    INFO: UniqueResource started
+> 
+> ExampleResourceTestA > testHelloEndpoint() PASSED
 
-```shell script
-./gradlew build
-```
-
-It produces the `quarkus-run.jar` file in the `build/quarkus-app/` directory.
-Be aware that it’s not an _über-jar_ as the dependencies are copied into the `build/quarkus-app/lib/` directory.
-
-The application is now runnable using `java -jar build/quarkus-app/quarkus-run.jar`.
-
-If you want to build an _über-jar_, execute the following command:
-
-```shell script
-./gradlew build -Dquarkus.package.type=uber-jar
-```
-
-The application, packaged as an _über-jar_, is now runnable using `java -jar build/*-runner.jar`.
-
-## Creating a native executable
-
-You can create a native executable using:
-
-```shell script
-./gradlew build -Dquarkus.package.type=native
-```
-
-Or, if you don't have GraalVM installed, you can run the native executable build in a container using:
-
-```shell script
-./gradlew build -Dquarkus.package.type=native -Dquarkus.native.container-build=true
-```
-
-You can then execute your native executable with: `./build/demo-1.0-SNAPSHOT-runner`
-
-If you want to learn more about building native executables, please consult https://quarkus.io/guides/gradle-tooling.
-
-## Provided Code
-
-### RESTEasy Reactive
-
-Easily start your Reactive RESTful Web Services
-
-[Related guide section...](https://quarkus.io/guides/getting-started-reactive#reactive-jax-rs-resources)
+ExampleResourceTestB STANDARD_ERROR  
+>    INFO: SharedResource stopped  <-- Should not have stopped    
+>    INFO: UniqueResource stopped  
+> 
+>    INFO: SharedResource started   
+>    INFO: UniqueResource started
+> 
+>    INFO: SharedResource stopped  
+>    INFO: UniqueResource stopped
